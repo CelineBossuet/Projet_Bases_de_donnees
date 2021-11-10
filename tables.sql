@@ -1,0 +1,54 @@
+-- Ici ça code
+
+CREATE TABLE OFFRE (
+    ID_prod INTEGER NOT NULL,
+    date_heure TIMESTAMP NOT NULL,
+    prix INTEGER NOT NULL CHECK(prix >= 0),
+    ID_uti INTEGER NOT NULL,
+    PRIMARY KEY (ID_prod,date_heure),
+    FOREIGN KEY (ID_uti) REFERENCES ID_UTILISATEUR(ID_uti)
+);
+
+
+CREATE TABLE PRODUIT (
+    ID_prod INTEGER NOT NULL,
+    intitule VARCHAR() NOT NULL,
+    prix_produit INTEGER NOT NULL CHECK(prix_produit >= 0),
+    texte VARCHAR() NOT NULL,
+    URL VARCHAR() NOT NULL,
+    nb_offre INTEGER NOT NULL CHECK(nb_offre >= 0 AND nb_offre <= 5),
+    PRIMARY KEY (ID_prod)
+);
+
+
+CREATE TABLE CARACTERISTIQUE (
+    ID_prod INTEGER NOT NULL,
+    nom_cara VARCHAR() NOT NULL,
+    valeur VARCHAR() NOT NULL,
+    PRIMARY KEY (ID_prod, nom_cara),
+    FOREIGN KEY (ID_prod) REFERENCES PRODUIT(ID_prod)
+);
+
+
+CREATE TABLE CATEGORIE (
+    ID_cat INTEGER NOT NULL,
+    nom_cat VARCHAR() NOT NULL,
+    ID_pere INTEGER NOT NULL,
+    PRIMARY KEY (ID_cat),
+    FOREIGN KEY (ID_pere) REFERENCES CATEGORIE(ID_cat)
+);
+
+CREATE TABLE ID_UTILISATEUR (
+    ID_uti INTEGER NOT NULL PRIMARY KEY
+);
+
+CREATE TABLE UTILISATEUR (
+    ID_uti INTEGER NOT NULL,
+    mail VARCHAR() NOT NULL,
+    mdp VARCHAR() NOT NULL,
+    nom VARCHAR() NOT NULL,
+    prenom VARCHAR() NOT NULL,
+    adresse VARCHAR() NOT NULL,
+    PRIMARY KEY (ID_uti),
+    FOREIGN KEY (ID_uti) REFERENCES ID_UTILISATEUR(ID_uti)
+);
