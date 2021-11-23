@@ -5,7 +5,7 @@ public class InterfaceUtilisateur {
 	ManagerDatabase mdb = new ManagerDatabase();
 	
 	public void start() {
-		System.out.println("Bienvenue dans de Gange");
+		System.out.println("Bienvenue dans le Gange");
 		mdb.setup();
 		mdb.connect();
 		int option = -1;
@@ -15,6 +15,7 @@ public class InterfaceUtilisateur {
 			System.out.println("Que voulez-vous faire ?");
 			System.out.println("1 - Connexion utilisateur");
 			
+			System.out.println("8 - Afficher les catégories");
 			System.out.println("9 - Afficher les utilisateurs");
 			System.out.println("10 - Supprimer un utilisateur");
 			System.out.println("0 - Quitter l'application");
@@ -35,6 +36,9 @@ public class InterfaceUtilisateur {
 					String mdpUser = scanner.next();
 					scanner.nextLine();
 					mdb.connexionUser(mailUser, mdpUser);
+					break;
+				case 8:
+					mdb.afficheProduitCategorie();
 					break;
 				case 9:
 					mdb.afficherUser();

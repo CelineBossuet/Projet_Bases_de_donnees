@@ -163,7 +163,7 @@ public class ManagerDatabase {
 					System.out.println("Déconnexion validée");
 					return;
 				case 1:
-					afficheCategorie();
+					afficheProduitCategorie();
 					break;
 				case 2:
 					break;
@@ -176,10 +176,10 @@ public class ManagerDatabase {
 		
 	}
 
-	private void afficheCategorie() {
+	public void afficheProduitCategorie() {
 		try {
 			Statement statmt = connection.createStatement();
-			ResultSet res = statmt.executeQuery("SELECT * FROM UTILISATEUR");
+			ResultSet res = statmt.executeQuery("SELECT * FROM CATEGORIE WHERE nom_cat NOT IN (SELECT nom_cat FROM EST_LA_SOUS_CATEGORIE_DE)");
 			/*
 			Resultats1 = Requete(Entree0) puis for Entree1 in Resultats1
 			{ Resultats2 += Requete(Entree1) } etc... (plein de JOIN)
@@ -187,12 +187,38 @@ public class ManagerDatabase {
 			*/
 			while (res.next()) {
 				System.out.println(
-						" -> ID " + res.getInt("ID_uti") + " : "+ res.getString("prenom") + " " + res.getString("nom")
+						" -> " + res.getString("nom_cat")
 						);
+				afficheProduitCategorieRecurs(1, res.getString("nom_cat"));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public Boolean afficheProduitCategorieRecurs(int nb_pere, String pere) {
+		Boolean est_pere = false;
+		try {
+			PreparedStatement statmt = connection.prepareStatement(
+					"SELECT * FROM EST_LA_SOUS_CATEGORIE_DE WHERE nom_pere LIKE ?"
+					);
+			statmt.setString(1, pere);
+			ResultSet res = statmt.executeQuery();
+			while (res.next()) {
+				est_pere = true;
+				System.out.print(" ");
+				for (int i = 0; i < nb_pere; i++) {
+					System.out.print("-");
+				}
+				System.out.println(
+						"-> " + res.getString("nom_cat")
+						);
+				afficheProduitCategorieRecurs(nb_pere +1, res.getString("nom_cat"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return est_pere;
 	}
 	
 }
