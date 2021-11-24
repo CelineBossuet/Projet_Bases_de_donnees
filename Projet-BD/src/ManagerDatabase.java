@@ -103,25 +103,32 @@ public class ManagerDatabase {
 		try {
 			Savepoint save1 = connection.setSavepoint("Suppression");
 
-			System.out.println("Cherche max ID");
 			// Chercher un nouvel ID inutilisé
 			Statement statmt = connection.createStatement();
 			ResultSet res = statmt.executeQuery("SELECT max(id_uti) FROM ID_UTILISATEUR");
-			res.next();
-			int newID = res.getInt(1) + 1;
+			int newID = 1;
+			if (res.next()) {
+				newID = res.getInt(1) + 1;
+			}
+			else {
+				System.out.println("Aucun utilisateur à supprimer");
+				connection.rollback(save1);
+				return;
+			}
 
-			System.out.println("Ajoute new ID" + newID);
+
 			// Créer un nouvel ID et l'insérer dans les ID_utilisteurs
 			PreparedStatement statmt2 = connection.prepareStatement(
-					"INSERT INTO ID_UTILISATEUR VALUES(?)"
+					"INSERT INTO ID_UTILISATEUR VALUES (?)"
 					);
 			statmt2.setInt(1, newID);
 			statmt2.executeUpdate();
 
-			System.out.println("Cherche ID via mail");
+
+
 			// Chercher l'ID de l'utilisateur
 			PreparedStatement statmt3 = connection.prepareStatement(
-					"SELECT id_uti FROM UTILISATEUR WHERE mail = ?"
+					"SELECT id_uti FROM UTILISATEUR WHERE mail LIKE ?"
 					);
 			statmt3.setString(1, mailUser);
 			ResultSet res3 = statmt3.executeQuery();
@@ -130,49 +137,45 @@ public class ManagerDatabase {
 				idUser = res3.getInt("id_uti");
 			}
 			else {
-				System.out.println("");
+				System.out.println("Aucun utilisateur ne possède ce mail");
 				connection.rollback(save1);
 				return;
 			}
 
-			System.out.println("Cherche offre");
+
 			// Chercher toutes les offres dont il faut modifier l'ID utilisateur
 			PreparedStatement statmt6 = connection.prepareStatement(
 					"SELECT ID_prod, date_heure, ID_uti FROM OFFRE WHERE ID_uti = ?"
 					);
 			statmt6.setInt(1, idUser);
 			ResultSet res6 = statmt6.executeQuery();
-
-			System.out.println("Avant boucle");
-
-			/*
-
 			while (res6.next()) {
-
 				// Modifier les offres réalisées par cet utilisateur
 				PreparedStatement statmt4 = connection.prepareStatement(
 						"UPDATE OFFRE SET id_uti = ? WHERE id_uti = ? AND date_heure = ? AND ID_prod = ?"
 						);
 				statmt4.setInt(1, newID);
 				statmt4.setInt(2, idUser);
-				statmt4.setInt(3, res6.getInt("date_heure"));
+				statmt4.setTimestamp(3, res6.getTimestamp("date_heure"));
 				statmt4.setInt(4, res6.getInt("ID_prod"));
 				statmt4.executeUpdate();
-
 			}
 
-			System.out.println("MOFIFIE");
 
-			// Supprimer l'utilisateur
+			// Supprimer l'utilisateur et son ID
 			PreparedStatement statmt5 = connection.prepareStatement(
-					"DELETE FROM UTILISATEUR WHERE mail = ?"
+					"DELETE FROM UTILISATEUR WHERE mail LIKE ?"
 					);
 			statmt5.setString(1, mailUser);
 			statmt5.executeUpdate();
+			PreparedStatement statmt7 = connection.prepareStatement(
+					"DELETE FROM ID_UTILISATEUR WHERE id_uti = ?"
+					);
+			statmt7.setInt(1, idUser);
+			statmt7.executeUpdate();
 
-			*/
 
-			System.out.println("FINITO");
+			System.out.println("Suppression terminée");
 			connection.commit();
 
 		} catch (SQLException e) {
