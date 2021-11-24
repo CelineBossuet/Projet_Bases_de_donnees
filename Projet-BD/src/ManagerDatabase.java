@@ -235,6 +235,8 @@ public class ManagerDatabase {
 					afficheProduitCategorie();
 					break;
 				case 2:
+                    afficheRecommandationsPerso(mail);
+                    recommandationsGenerales(mail);
 					break;
 				default:
 					// Ne rien faire
@@ -310,6 +312,34 @@ public class ManagerDatabase {
 		}
 		catch(SQLException e)
 		{
+			e.printStackTrace();
+		}
+	}
+
+	public void recommandationsGenerales(String mail) {
+		try {
+			PreparedStatement stmt = connection.prepareStatement("SELECT nom_cat, AVG(nb_offres) AS moyenne_offre FROM (SELECT prod.ID_prod, prod.nom_cat, COUNT(*) AS nb_offres FROM PRODUIT prod   JOIN OFFRE "
+					+ "    ON OFFRE.ID_prod = prod.ID_prod"
+					+ "    GROUP BY prod.ID_prod, prod.nom_cat"
+					+ "    UNION"
+					+ "    SELECT prod1.ID_prod, prod1.nom_cat, 0 as nb_offres from PRODUIT prod1"
+					+ "    WHERE prod1.ID_prod NOT IN (SELECT OFFRE.ID_prod from OFFRE)"
+					+ "    GROUP BY prod1.ID_prod, prod1.nom_cat)"
+					+ "    WHERE nom_cat not in (	SELECT DISTINCT PRODUIT.nom_cat FROM OFFRE "
+					+ "    						JOIN PRODUIT ON PRODUIT.ID_prod = OFFRE.ID_prod"
+					+ "    						JOIN UTILISATEUR ON UTILISATEUR.ID_uti = OFFRE.ID_uti"
+					+ "    						WHERE UTILISATEUR.mail = ? AND NOT EXISTS (SELECT * FROM REMPORTE JOIN OFFRE OFR "
+					+ "                         ON REMPORTE.ID_prod = OFR.ID_prod AND REMPORTE.date_heure = OFR.date_heure "
+					+ "                         WHERE OFR.ID_uti = OFFRE.ID_uti AND OFFRE.ID_prod = REMPORTE.ID_prod))"
+					+ "	GROUP BY nom_cat"
+					+ "	ORDER BY moyenne_offre DESC, nom_cat ");
+			String cpy_mail = new String(mail);
+			stmt.setString(1, cpy_mail);
+			ResultSet res = stmt.executeQuery();
+			while (res.next()) {
+				System.out.println("->" + res.getString(1));
+			}
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
