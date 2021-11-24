@@ -44,9 +44,11 @@ public class InterfaceUtilisateur {
 					mdb.afficherUser();
 					break;
 				case 10:
-					String idUser = scanner.next();
+					System.out.println("Saisir le mail de la personne à supprimer");
+					System.out.println("Mail :");
+					String mailUserDelete = scanner.next();
 					scanner.nextLine();
-					mdb.supprimer(Integer.valueOf(idUser));
+					mdb.supprimer(mailUserDelete);
 					break;
 				default:
 					// Ne rien faire
