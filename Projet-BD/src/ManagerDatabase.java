@@ -2,9 +2,9 @@ import java.sql.*;
 import java.util.Scanner;
 
 public class ManagerDatabase {
-	
+
 	Connection connection;
-	
+
 	public void setup() {
 		try {
 			DriverManager.registerDriver(new oracle.jdbc.driver.OracleDriver());
@@ -12,44 +12,44 @@ public class ManagerDatabase {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void connect() {
 		try {
 			System.out.println("Connexion ici");
 			String url = "jdbc:oracle:thin:@oracle1.ensimag.fr:1521:oracle1";
 			String user = "ganderf";
 			String password = "ganderf";
-			
+
 			connection = DriverManager.getConnection(url, user, password);
 			connection.setAutoCommit(false);
-			
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	// Requêtes
 				//requete();
-				
+
 				// Mettre des checkpoint si besoin
 				//Savepoint save1 = connection.setSavepoint("Nom du Checkpoint 1");
-				
+
 				// Choisir si validation ou non
-				//connection.rollback(); 
+				//connection.rollback();
 				//connection.rollback(save1);
 				//connection.commit();
-	
-	
+
+
 	public void close() {
 		try {
 			connection.commit();
 			connection.close();
-			
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void requete() {
 		try {
 			Statement statmt = connection.createStatement();
@@ -67,26 +67,26 @@ public class ManagerDatabase {
 			e.printStackTrace();
 		}
 	}
-	
-	
+
+
 	public void requeteParam() {
 		try {
 			PreparedStatement statmt = connection.prepareStatement(
 					"SELECT * FROM emp WHERE ename LIKE ?"
 					);
-			
+
 			System.out.println("Nom de l'employe : ");
 			Scanner scan = new Scanner(System.in);
 			String empName = scan.next();
 			scan.nextLine();
-			
+
 			statmt.setString(1, empName);
 			ResultSet res = statmt.executeQuery();
-			
+
 			// Metadonnées associées, existe aussi pour toute la base de données
 			ResultSetMetaData rmd = res.getMetaData();
-			
-			// Utiliser .next() et .previous() 
+
+			// Utiliser .next() et .previous()
 			while (res.next()) {
 				System.out.println(
 						"Employe " + res.getString("ename")
@@ -102,14 +102,14 @@ public class ManagerDatabase {
 	public void supprimer(String mailUser) {
 		try {
 			Savepoint save1 = connection.setSavepoint("Suppression");
-			
+
 			System.out.println("Cherche max ID");
 			// Chercher un nouvel ID inutilisé
 			Statement statmt = connection.createStatement();
 			ResultSet res = statmt.executeQuery("SELECT max(id_uti) FROM ID_UTILISATEUR");
 			res.next();
 			int newID = res.getInt(1) + 1;
-			
+
 			System.out.println("Ajoute new ID" + newID);
 			// Créer un nouvel ID et l'insérer dans les ID_utilisteurs
 			PreparedStatement statmt2 = connection.prepareStatement(
@@ -117,7 +117,7 @@ public class ManagerDatabase {
 					);
 			statmt2.setInt(1, newID);
 			statmt2.executeUpdate();
-			
+
 			System.out.println("Cherche ID via mail");
 			// Chercher l'ID de l'utilisateur
 			PreparedStatement statmt3 = connection.prepareStatement(
@@ -134,7 +134,7 @@ public class ManagerDatabase {
 				connection.rollback(save1);
 				return;
 			}
-			
+
 			System.out.println("Cherche offre");
 			// Chercher toutes les offres dont il faut modifier l'ID utilisateur
 			PreparedStatement statmt6 = connection.prepareStatement(
@@ -142,13 +142,13 @@ public class ManagerDatabase {
 					);
 			statmt6.setInt(1, idUser);
 			ResultSet res6 = statmt6.executeQuery();
-			
+
 			System.out.println("Avant boucle");
-			
+
 			/*
-			
+
 			while (res6.next()) {
-				
+
 				// Modifier les offres réalisées par cet utilisateur
 				PreparedStatement statmt4 = connection.prepareStatement(
 						"UPDATE OFFRE SET id_uti = ? WHERE id_uti = ? AND date_heure = ? AND ID_prod = ?"
@@ -158,23 +158,23 @@ public class ManagerDatabase {
 				statmt4.setInt(3, res6.getInt("date_heure"));
 				statmt4.setInt(4, res6.getInt("ID_prod"));
 				statmt4.executeUpdate();
-				
+
 			}
-			
+
 			System.out.println("MOFIFIE");
-			
+
 			// Supprimer l'utilisateur
 			PreparedStatement statmt5 = connection.prepareStatement(
 					"DELETE FROM UTILISATEUR WHERE mail = ?"
 					);
 			statmt5.setString(1, mailUser);
 			statmt5.executeUpdate();
-			
+
 			*/
-			
+
 			System.out.println("FINITO");
 			connection.commit();
-			
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -193,7 +193,7 @@ public class ManagerDatabase {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void connexionUser(String mail, String mdp) {
 		try {
 			PreparedStatement statmt = connection.prepareStatement(
@@ -202,7 +202,7 @@ public class ManagerDatabase {
 			statmt.setString(1, mail);
 			statmt.setString(2, mdp);
 			ResultSet res = statmt.executeQuery();
-			
+
 			if (res.next()) {
 				System.out.println(
 						res.getString("prenom") + " " + res.getString("nom") + " connecté !"
@@ -223,7 +223,7 @@ public class ManagerDatabase {
 			System.out.println("1 - Afficher les catégories & sous-catégories");
 			System.out.println("2 - Afficher les catégories & sous-catégories recommandés");
 			System.out.println("0 - Déconnexion");
-			
+
 			Scanner scan = new Scanner(System.in);
 			String optionUser = scan.next();
 			scan.nextLine();
@@ -242,7 +242,7 @@ public class ManagerDatabase {
 			}
 		}
 
-		
+
 	}
 
 	public void afficheProduitCategorie() {
@@ -264,7 +264,7 @@ public class ManagerDatabase {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public Boolean afficheProduitCategorieRecurs(int nb_pere, String pere) {
 		Boolean est_pere = false;
 		try {
@@ -289,5 +289,28 @@ public class ManagerDatabase {
 		}
 		return est_pere;
 	}
-	
+
+	public void afficheRecommandationsPerso(String mail)
+	{
+		try
+		{
+			PreparedStatement statmt = connection.prepareStatement(
+											"SELECT nom_cat, COUNT(*) AS nb_offres FROM (SELECT * FROM OFFRE "
+											+ "JOIN PRODUIT ON PRODUIT.ID_prod = OFFRE.ID_prod "
+											+ "JOIN UTILISATEUR ON UTILISATEUR.ID_uti = OFFRE.ID_uti "
+											+ "WHERE UTILISATEUR.mail = ? AND NOT EXISTS (SELECT * FROM REMPORTE JOIN OFFRE OFR "
+											+ "ON REMPORTE.ID_prod = OFR.ID_prod AND REMPORTE.date_heure = OFR.date_heure "
+											+ "WHERE OFR.ID_uti = OFFRE.ID_uti AND OFFRE.ID_prod = REMPORTE.ID_prod)) "
+											+ "GROUP BY nom_cat ORDER BY nb_offres DESC, nom_cat");
+			statmt.setString(1, mail);
+			ResultSet res = statmt.executeQuery();
+			while (res.next()) {
+				System.out.println("-> " + res.getString("nom_cat"));
+			}
+		}
+		catch(SQLException e)
+		{
+			e.printStackTrace();
+		}
+	}
 }
