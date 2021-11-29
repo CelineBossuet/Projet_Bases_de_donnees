@@ -219,12 +219,96 @@ public class ManagerDatabase {
 			e.printStackTrace();
 		}
 	}
+	
+	public void ficheProduit(int Id_prod) {
+		try {
+			PreparedStatement stat = connection.prepareStatement("SELECT * FROM PRODUIT WHERE ID_prod=?");
+			stat.setInt(1, Id_prod);
+			ResultSet res = stat.executeQuery();
+			
+			if (res.next()) {
+				System.out.println("Voici la fiche complète du produit numéro "+ Id_prod);
+				System.out.println("intitulé : " + res.getString("intitule"));
+				System.out.println("prix : " +res.getInt("prix_produit") +" euros");
+				System.out.println("description du produit : \n" + res.getString("texte"));
+				System.out.println("URL : " + res.getString("URL"));
+				System.out.println("présent dans la catégorie : "+res.getString("nom_cat"));
+			}else {
+				System.out.println("Le produit n'existe pas");
+			}
+			
+			
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+	}
 
+	public void enchere(int ID_prod, int prix_proposé, String mail) {
+		try {
+			Savepoint sav = connection.setSavepoint("Encheres");
+			
+			PreparedStatement sta = connection.prepareStatement("SELECT ID_uti FROM UTILISATEUR WHERE mail=?");
+			sta.setString(1,  mail);
+			ResultSet r = sta.executeQuery();
+			r.next();
+			
+			PreparedStatement statmt = connection.prepareStatement("SELECT ID_prod FROM PRODUIT WHERE ID_prod=? AND prix_produit < ? AND ID_prod NOT IN (SELECT ID_prod FROM REMPORTE)");
+			statmt.setInt(1, ID_prod);
+			statmt.setInt(2, prix_proposé);
+			ResultSet res = statmt.executeQuery();
+			if(res.next() ) {
+				//ajout de l'offre dans la base de donnée
+				
+				PreparedStatement statm = connection.prepareStatement("INSERT INTO OFFRE VALUES(?, (SELECT LOCALTIMESTAMP FROM dual), ?, ?)");
+				statm.setInt(1, res.getInt("ID_prod"));
+				statm.setInt(2,  prix_proposé);
+				statm.setInt(3,  r.getInt("ID_uti"));
+				int re=statm.executeUpdate();
+				
+				PreparedStatement prd= connection.prepareStatement("UPDATE PRODUIT SET prix_produit=? WHERE ID_prod=?");
+				prd.setInt(1, prix_proposé);
+				prd.setInt(2,ID_prod);
+				int p=prd.executeUpdate();
+				
+				System.out.println("Votre enchère a bien été prise en compte !");
+				
+				//count du nb d'offres pour le produit
+				PreparedStatement count=connection.prepareStatement("SELECT COUNT(*) FROM OFFRE WHERE ID_prod = ?");
+				count.setInt(1, res.getInt("ID_prod"));
+				ResultSet nb=count.executeQuery();
+				nb.next();
+				//System.out.println("il y a déjà "+nb.getInt(1) +" offres");
+				
+				//vérification de si c'est la 5ème offre
+				if (nb.getInt(1)==5) {
+					System.out.println("Bravo vous avez remporté le produit "+ res.getInt("ID_prod"));
+					PreparedStatement ajout = connection.prepareStatement("INSERT INTO REMPORTE VALUES(? , ((SELECT date_heure FROM OFFRE WHERE ID_prod = ?)\n"
+							+ "                                MINUS\n"
+							+ "                                (SELECT DISTINCT O1.date_heure FROM OFFRE O1 JOIN OFFRE O2\n"
+							+ "                                    ON O1.ID_prod = O2.ID_prod AND O1.ID_prod = ?\n"
+							+ "                                WHERE O1.date_heure < O2.date_heure)))");
+					ajout.setInt(1, res.getInt("ID_prod"));
+					ajout.setInt(2, res.getInt("ID_prod"));
+					ajout.setInt(3, res.getInt("ID_prod"));
+					int ajouté=ajout.executeUpdate();
+					
+				}
+				
+			}else {
+				System.out.println("produit n'est pas à vendre / prix trop bas");
+			}
+			connection.commit();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	private void espaceUser(String mail) {
 		while (true) {
 			System.out.println("Session de " + mail + ", que souhaitez-vous faire ?");
 			System.out.println("1 - Afficher les catégories & sous-catégories");
 			System.out.println("2 - Afficher les catégories & sous-catégories recommandés");
+			System.out.println("3 - Faire une enchère sur un produit");
 			System.out.println("0 - Déconnexion");
 
 			Scanner scan = new Scanner(System.in);
@@ -240,6 +324,14 @@ public class ManagerDatabase {
 				case 2:
                     afficheRecommandationsPerso(mail);
                     recommandationsGenerales(mail);
+					break;
+				case 3:
+					System.out.println("Saisir le numéro du produit :");
+					String ID = scan.next();
+					scan.nextLine();
+					System.out.println("Saisir le prix proposé :");
+					String prix = scan.next();
+					enchere(Integer.valueOf(ID), Integer.valueOf(prix), mail);
 					break;
 				default:
 					// Ne rien faire

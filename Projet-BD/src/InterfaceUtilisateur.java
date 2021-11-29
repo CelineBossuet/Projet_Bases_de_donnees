@@ -15,6 +15,7 @@ public class InterfaceUtilisateur {
 			System.out.println("Que voulez-vous faire ?");
 			System.out.println("1 - Connexion utilisateur");
 			
+			System.out.println("6 - Afficher un produit");
 			System.out.println("7 - Afficher les catégories");
 			System.out.println("8 - Afficher les produits d'une catégorie");
 			System.out.println("9 - Afficher les utilisateurs");
@@ -37,6 +38,12 @@ public class InterfaceUtilisateur {
 					String mdpUser = scanner.next();
 					scanner.nextLine();
 					mdb.connexionUser(mailUser, mdpUser);
+					break;
+				case 6:
+					System.out.println("Saisir le numéro du produit :");
+					String ID=scanner.next();
+					scanner.nextLine();
+					mdb.ficheProduit(Integer.valueOf(ID));
 					break;
 				case 7:
 					mdb.afficheProduitCategorie();
