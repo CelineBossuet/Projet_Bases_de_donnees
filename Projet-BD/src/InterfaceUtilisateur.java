@@ -1,9 +1,9 @@
 import java.util.Scanner;
 
 public class InterfaceUtilisateur {
-	
+
 	ManagerDatabase mdb = new ManagerDatabase();
-	
+
 	public void start() {
 		System.out.println("Bienvenue dans le Gange");
 		mdb.setup();
@@ -14,12 +14,10 @@ public class InterfaceUtilisateur {
 			System.out.println("------------------------------------------------");
 			System.out.println("Que voulez-vous faire ?");
 			System.out.println("1 - Connexion utilisateur");
-			
-			System.out.println("6 - Afficher un produit");
-			System.out.println("7 - Afficher les catégories");
-			System.out.println("8 - Afficher les produits d'une catégorie");
-			System.out.println("9 - Afficher les utilisateurs");
-			System.out.println("10 - Supprimer un utilisateur");
+			System.out.println("2 - Afficher un produit");
+			System.out.println("3 - Afficher les catégories");
+			System.out.println("4 - Afficher les produits d'une catégorie");
+			System.out.println("5 - Afficher les utilisateurs");
 			System.out.println("0 - Quitter l'application");
 			String optionUser = scanner.next();
 			scanner.nextLine();
@@ -39,30 +37,23 @@ public class InterfaceUtilisateur {
 					scanner.nextLine();
 					mdb.connexionUser(mailUser, mdpUser);
 					break;
-				case 6:
+				case 2:
 					System.out.println("Saisir le numéro du produit :");
 					String ID=scanner.next();
 					scanner.nextLine();
 					mdb.ficheProduit(Integer.valueOf(ID));
 					break;
-				case 7:
+				case 3:
 					mdb.afficheProduitCategorie();
 					break;
-				case 8:
+				case 4:
 					System.out.println("Saisir la catégorie recherchée :");
 					String categorie = scanner.next();
 					scanner.nextLine();
 					mdb.afficheProduits(categorie);
 					break;
-				case 9:
+				case 5:
 					mdb.afficherUser();
-					break;
-				case 10:
-					System.out.println("Saisir le mail de la personne à supprimer");
-					System.out.println("Mail :");
-					String mailUserDelete = scanner.next();
-					scanner.nextLine();
-					mdb.supprimer(mailUserDelete);
 					break;
 				default:
 					// Ne rien faire
