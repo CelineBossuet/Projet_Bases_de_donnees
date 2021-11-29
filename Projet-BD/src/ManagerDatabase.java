@@ -309,6 +309,7 @@ public class ManagerDatabase {
 			System.out.println("1 - Afficher les catégories & sous-catégories");
 			System.out.println("2 - Afficher les catégories & sous-catégories recommandés");
 			System.out.println("3 - Faire une enchère sur un produit");
+			System.out.println("4 - Voir la fiche d'un produit");
 			System.out.println("0 - Déconnexion");
 
 			Scanner scan = new Scanner(System.in);
@@ -332,6 +333,12 @@ public class ManagerDatabase {
 					System.out.println("Saisir le prix proposé :");
 					String prix = scan.next();
 					enchere(Integer.valueOf(ID), Integer.valueOf(prix), mail);
+					break;
+				case 4:
+					System.out.println("Saisir le numéro du produit :");
+					String ID=scanner.next();
+					scanner.nextLine();
+					ficheProduit(Integer.valueOf(ID));
 					break;
 				default:
 					// Ne rien faire
