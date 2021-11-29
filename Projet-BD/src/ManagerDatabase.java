@@ -346,4 +346,52 @@ public class ManagerDatabase {
 			e.printStackTrace();
 		}
 	}
+	
+	
+	
+	
+	
+	
+	public void afficheProduits(String categorie) {
+		try {
+			PreparedStatement statmt = connection.prepareStatement(
+					"SELECT OFFRE.ID_PROD, count(*) AS nb_offres, PRODUIT.intitule FROM OFFRE"
+					+ "      JOIN PRODUIT ON PRODUIT.ID_prod = OFFRE.ID_prod"
+					+ "      WHERE PRODUIT.nom_cat LIKE ?"
+					+ "            AND NOT EXISTS (SELECT * FROM REMPORTE"
+					+ "                            JOIN OFFRE OFR ON REMPORTE.ID_prod = OFR.ID_prod AND"
+					+ "                                             REMPORTE.date_heure = OFR.date_heure"
+					+ "                            WHERE OFFRE.ID_prod = REMPORTE.ID_prod) "
+					+ "GROUP BY OFFRE.ID_prod, PRODUIT.intitule "
+					+ "ORDER BY nb_offres DESC, PRODUIT.intitule");
+			statmt.setString(1, categorie);
+			ResultSet res = statmt.executeQuery();
+			while (res.next()) {
+				PreparedStatement statmt2 = connection.prepareStatement(
+						"SELECT * FROM PRODUIT WHERE ID_prod=?");
+				statmt2.setInt(1, res.getInt("ID_prod"));
+				ResultSet res2 = statmt2.executeQuery();
+				res2.next();
+				System.out.println(
+						" -> ID " + res2.getInt("ID_prod") + " : " + res2.getString("intitule") + " " + res2.getInt("prix_produit")
+						);
+			}
+			
+			PreparedStatement statmt3 = connection.prepareStatement(
+					"SELECT * FROM PRODUIT"
+					+ "      WHERE nom_cat LIKE ?"
+					+ "            AND NOT EXISTS (SELECT ID_prod FROM OFFRE WHERE PRODUIT.ID_prod = OFFRE.ID_prod) "
+					+ "ORDER BY PRODUIT.intitule");
+			statmt3.setString(1, categorie);
+			ResultSet res3 = statmt3.executeQuery();
+			while (res3.next()) {
+				System.out.println(
+						" -> ID " + res3.getInt("ID_prod") + " : " + res3.getString("intitule") + " " + res3.getInt("prix_produit")
+						);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
 }
