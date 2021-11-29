@@ -438,7 +438,7 @@ public class ManagerDatabase {
 			stmt.setString(1, mail);
 			ResultSet res = stmt.executeQuery();
 			while (res.next()) {
-				System.out.println("->" + res.getString(1));
+				System.out.println("-> " + res.getString(1));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
