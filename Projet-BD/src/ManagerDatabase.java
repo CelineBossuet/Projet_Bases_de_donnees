@@ -336,8 +336,7 @@ public class ManagerDatabase {
 					+ "                         WHERE OFR.ID_uti = OFFRE.ID_uti AND OFFRE.ID_prod = REMPORTE.ID_prod))"
 					+ "	GROUP BY nom_cat"
 					+ "	ORDER BY moyenne_offre DESC, nom_cat ");
-			String cpy_mail = new String(mail);
-			stmt.setString(1, cpy_mail);
+			stmt.setString(1, mail);
 			ResultSet res = stmt.executeQuery();
 			while (res.next()) {
 				System.out.println("->" + res.getString(1));
@@ -346,12 +345,12 @@ public class ManagerDatabase {
 			e.printStackTrace();
 		}
 	}
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
 	public void afficheProduits(String categorie) {
 		try {
 			PreparedStatement statmt = connection.prepareStatement(
