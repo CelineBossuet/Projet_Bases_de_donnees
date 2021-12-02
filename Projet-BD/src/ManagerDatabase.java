@@ -1,5 +1,4 @@
 import java.sql.*;
-import java.util.Scanner;
 
 public class ManagerDatabase {
 
@@ -277,12 +276,15 @@ public class ManagerDatabase {
 
 	private void espaceUser(String mail) {
 		while (true) {
+			System.out.println("------------------------------------------------");
 			System.out.println("Session de " + mail + ", que souhaitez-vous faire ?");
-			System.out.println("1 - Afficher les catégories & sous-catégories");
-			System.out.println("2 - Afficher les catégories & sous-catégories recommandés");
-			System.out.println("3 - Faire une enchère sur un produit");
-			System.out.println("4 - Voir la fiche d'un produit");
-			System.out.println("5 - Supprimer votre compte (irréversible)");
+			System.out.println("1 - Faire une enchère sur un produit");
+			System.out.println("2 - Afficher les catégories & sous-catégories");
+			System.out.println("3 - Afficher les catégories & sous-catégories recommandés");
+			System.out.println("4 - Afficher les produits d'une catégorie");
+			System.out.println("5 - Voir la fiche d'un produit");
+			System.out.println("6 - Afficher les utilisateurs");
+			System.out.println("7 - Supprimer votre compte (irréversible)");
 			System.out.println("0 - Déconnexion");
 
 			Scanner scan = new Scanner(System.in);
@@ -293,13 +295,6 @@ public class ManagerDatabase {
 					System.out.println("Déconnexion validée");
 					return;
 				case 1:
-					afficheProduitCategorie();
-					break;
-				case 2:
-                    afficheRecommandationsPerso(mail);
-                    recommandationsGenerales(mail);
-					break;
-				case 3:
 					System.out.println("Saisir le numéro du produit :");
 					String id = scan.next();
 					scan.nextLine();
@@ -307,14 +302,30 @@ public class ManagerDatabase {
 					String prix = scan.next();
 					enchere(Integer.valueOf(id), Integer.valueOf(prix), mail);
 					break;
+				case 2:
+					afficheProduitCategorie();
+					break;
+				case 3:
+					afficheRecommandationsPerso(mail);
+          recommandationsGenerales(mail);
+					break;
 				case 4:
+					System.out.println("Saisir la catégorie recherchée :");
+					String categorie = scan.next();
+					scan.nextLine();
+					afficheProduits(categorie);
+					break;
+				case 5:
 					System.out.println("Saisir le numéro du produit :");
 					String idProd = scan.next();
 					scan.nextLine();
 					ficheProduit(Integer.valueOf(idProd));
 					break;
-				case 5:
-					System.out.println("Toutes vos données personnelles vont être supprimées et vous ne pouvez plus vous connecter à ce compte");
+				case 6:
+					afficherUser();
+					break;
+				case 7:
+					System.out.println("Toutes vos données personnelles vont être supprimées et vous ne pourrez plus vous connecter à ce compte");
 					boolean reponseNonValide = true;
 					while(reponseNonValide)
 					{
