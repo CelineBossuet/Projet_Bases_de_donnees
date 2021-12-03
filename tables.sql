@@ -1,54 +1,64 @@
--- Ici ça code
+CREATE TABLE ID_UTILISATEUR (
+    ID_uti INTEGER NOT NULL PRIMARY KEY
+);
+
+CREATE TABLE UTILISATEUR (
+    mail VARCHAR(25) NOT NULL,
+    ID_uti INTEGER NOT NULL,
+    mdp VARCHAR(25) NOT NULL,
+    nom VARCHAR(25) NOT NULL,
+    prenom VARCHAR(25) NOT NULL,
+    adresse VARCHAR(100) NOT NULL,
+    PRIMARY KEY (mail),
+    FOREIGN KEY (ID_uti) REFERENCES ID_UTILISATEUR(ID_uti)
+);
+
+CREATE TABLE CATEGORIE (
+    nom_cat VARCHAR(25) NOT NULL,
+    PRIMARY KEY (nom_cat)
+);
+
+CREATE TABLE EST_LA_SOUS_CATEGORIE_DE (
+    nom_cat VARCHAR(25) NOT NULL,
+    nom_pere VARCHAR(25) NOT NULL,
+    PRIMARY KEY (nom_cat),
+    FOREIGN KEY (nom_cat) REFERENCES CATEGORIE(nom_cat),
+    FOREIGN KEY (nom_pere) REFERENCES CATEGORIE(nom_cat)
+);
+
+CREATE TABLE PRODUIT (
+    ID_prod INTEGER NOT NULL,
+    intitule VARCHAR(25) NOT NULL,
+    prix_produit INTEGER NOT NULL CHECK(prix_produit >= 0),
+    texte VARCHAR(255) NOT NULL,
+    URL VARCHAR(255) NOT NULL,
+    nom_cat VARCHAR(25) NOT NULL,
+    FOREIGN KEY (nom_cat) REFERENCES CATEGORIE(nom_cat),
+    PRIMARY KEY (ID_prod)
+);
+
+CREATE TABLE CARACTERISTIQUE (
+    ID_prod INTEGER NOT NULL,
+    nom_cara VARCHAR(25) NOT NULL,
+    valeur VARCHAR(25) NOT NULL,
+    PRIMARY KEY (ID_prod, nom_cara),
+    FOREIGN KEY (ID_prod) REFERENCES PRODUIT(ID_prod)
+);
 
 CREATE TABLE OFFRE (
     ID_prod INTEGER NOT NULL,
     date_heure TIMESTAMP NOT NULL,
     prix INTEGER NOT NULL CHECK(prix >= 0),
     ID_uti INTEGER NOT NULL,
-    PRIMARY KEY (ID_prod,date_heure),
+    PRIMARY KEY (ID_prod, date_heure),
+    FOREIGN KEY (ID_prod) REFERENCES PRODUIT(ID_prod),
     FOREIGN KEY (ID_uti) REFERENCES ID_UTILISATEUR(ID_uti)
 );
 
-
-CREATE TABLE PRODUIT (
+CREATE TABLE REMPORTE(
     ID_prod INTEGER NOT NULL,
-    intitule VARCHAR() NOT NULL,
-    prix_produit INTEGER NOT NULL CHECK(prix_produit >= 0),
-    texte VARCHAR() NOT NULL,
-    URL VARCHAR() NOT NULL,
-    nb_offre INTEGER NOT NULL CHECK(nb_offre >= 0 AND nb_offre <= 5),
-    PRIMARY KEY (ID_prod)
-);
-
-
-CREATE TABLE CARACTERISTIQUE (
-    ID_prod INTEGER NOT NULL,
-    nom_cara VARCHAR() NOT NULL,
-    valeur VARCHAR() NOT NULL,
-    PRIMARY KEY (ID_prod, nom_cara),
-    FOREIGN KEY (ID_prod) REFERENCES PRODUIT(ID_prod)
-);
-
-
-CREATE TABLE CATEGORIE (
-    ID_cat INTEGER NOT NULL,
-    nom_cat VARCHAR() NOT NULL,
-    ID_pere INTEGER NOT NULL,
-    PRIMARY KEY (ID_cat),
-    FOREIGN KEY (ID_pere) REFERENCES CATEGORIE(ID_cat)
-);
-
-CREATE TABLE ID_UTILISATEUR (
-    ID_uti INTEGER NOT NULL PRIMARY KEY
-);
-
-CREATE TABLE UTILISATEUR (
-    ID_uti INTEGER NOT NULL,
-    mail VARCHAR() NOT NULL,
-    mdp VARCHAR() NOT NULL,
-    nom VARCHAR() NOT NULL,
-    prenom VARCHAR() NOT NULL,
-    adresse VARCHAR() NOT NULL,
-    PRIMARY KEY (ID_uti),
-    FOREIGN KEY (ID_uti) REFERENCES ID_UTILISATEUR(ID_uti)
-);
+    date_heure TIMESTAMP NOT NULL,
+    PRIMARY KEY (ID_prod),
+    FOREIGN KEY (ID_prod) REFERENCES PRODUIT(ID_prod),
+    FOREIGN KEY (ID_prod, date_heure) REFERENCES OFFRE(ID_prod, date_heure)
+); 
