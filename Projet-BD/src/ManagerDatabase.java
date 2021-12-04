@@ -1,5 +1,5 @@
 import java.sql.*;
-import java.util.*;
+import java.util.Scanner;
 
 public class ManagerDatabase {
 
@@ -30,6 +30,7 @@ public class ManagerDatabase {
 
 	public void close() {
 		try {
+			// Valider si des changements ont été réalisés puis fermer
 			connection.commit();
 			connection.close();
 
@@ -37,8 +38,6 @@ public class ManagerDatabase {
 			e.printStackTrace();
 		}
 	}
-
-	
 
 	public void supprimer(String mailUser) {
 		try {
@@ -86,6 +85,7 @@ public class ManagerDatabase {
 					);
 			statmt6.setInt(1, idUser);
 			ResultSet res6 = statmt6.executeQuery();
+			
 			while (res6.next()) {
 				// Modifier les offres réalisées par cet utilisateur
 				PreparedStatement statmt4 = connection.prepareStatement(
@@ -110,7 +110,6 @@ public class ManagerDatabase {
 			statmt7.setInt(1, idUser);
 			statmt7.executeUpdate();
 
-
 			System.out.println("Suppression terminée");
 			connection.commit();
 
@@ -121,6 +120,7 @@ public class ManagerDatabase {
 
 	public void afficherUser() {
 		try {
+			// Affiche tout les utilisateurs (ID et noms)
 			Statement statmt = connection.createStatement();
 			ResultSet res = statmt.executeQuery("SELECT * FROM UTILISATEUR");
 			while (res.next()) {
@@ -135,6 +135,7 @@ public class ManagerDatabase {
 
 	public void connexionUser(String mail, String mdp) {
 		try {
+			// Recherche de l'utilisateur correspondant
 			PreparedStatement statmt = connection.prepareStatement(
 					"SELECT * FROM UTILISATEUR WHERE mail LIKE ? AND mdp LIKE ?"
 					);
@@ -158,13 +159,15 @@ public class ManagerDatabase {
 
 	public void ficheProduit(int Id_prod) {
 		try {
+			// Informations sur un produit
 			PreparedStatement stat = connection.prepareStatement("SELECT * FROM PRODUIT WHERE ID_prod=?");
 			stat.setInt(1, Id_prod);
 			ResultSet res = stat.executeQuery();
-
+			
 			PreparedStatement caract = connection.prepareStatement("SELECT * FROM CARACTERISTIQUE WHERE ID_prod=?");
 			caract.setInt(1, Id_prod);
-			ResultSet cara=stat.executeQuery();
+			ResultSet cara = stat.executeQuery();
+
 
 			if (res.next()) {
 				System.out.println("Voici la fiche complète du produit numéro "+ Id_prod);
@@ -173,11 +176,10 @@ public class ManagerDatabase {
 				System.out.println("description du produit : \n" + res.getString("texte"));
 				System.out.println("URL : " + res.getString("URL"));
 				System.out.println("présent dans la catégorie : "+res.getString("nom_cat"));
-
 				while (cara.next()){
 					System.out.println("Caractéristique " + cara.getString("nom_cara") + " : " + cara.getString("valeur"));
 				}
-				
+
 			}else {
 				System.out.println("Le produit n'existe pas");
 			}
@@ -190,24 +192,27 @@ public class ManagerDatabase {
 
 	public void enchere(int ID_prod, int prix_proposé, String mail) {
 		try {
+			// Récupérer l'ID de l'utilisateur correspondant
 			PreparedStatement sta = connection.prepareStatement("SELECT ID_uti FROM UTILISATEUR WHERE mail=?");
 			sta.setString(1,  mail);
 			ResultSet r = sta.executeQuery();
 			r.next();
 
+			// Récupérer l'ID du produit correspondant et vérifier qu'il ne soit ni déjà acheté, ni trop cher par rapport au prix proposé
 			PreparedStatement statmt = connection.prepareStatement("SELECT ID_prod FROM PRODUIT WHERE ID_prod=? AND prix_produit < ? AND ID_prod NOT IN (SELECT ID_prod FROM REMPORTE)");
 			statmt.setInt(1, ID_prod);
 			statmt.setInt(2, prix_proposé);
 			ResultSet res = statmt.executeQuery();
+			
 			if(res.next() ) {
-				//ajout de l'offre dans la base de donnée
-
+				// Ajouter l'offre dans la base de donnée
 				PreparedStatement statm = connection.prepareStatement("INSERT INTO OFFRE VALUES(?, (SELECT LOCALTIMESTAMP FROM dual), ?, ?)");
 				statm.setInt(1, res.getInt("ID_prod"));
 				statm.setInt(2,  prix_proposé);
 				statm.setInt(3,  r.getInt("ID_uti"));
 				statm.executeUpdate();
 
+				// Mettre à jour le prix du produit
 				PreparedStatement prd= connection.prepareStatement("UPDATE PRODUIT SET prix_produit=? WHERE ID_prod=?");
 				prd.setInt(1, prix_proposé);
 				prd.setInt(2,ID_prod);
@@ -215,13 +220,13 @@ public class ManagerDatabase {
 
 				System.out.println("Votre enchère a bien été prise en compte !");
 
-				//count du nb d'offres pour le produit
+				// Compter le nombre d'offres pour le produit
 				PreparedStatement count=connection.prepareStatement("SELECT COUNT(*) FROM OFFRE WHERE ID_prod = ?");
 				count.setInt(1, res.getInt("ID_prod"));
 				ResultSet nb=count.executeQuery();
 				nb.next();
 
-				//vérification de si c'est la 5ème offre
+				// Vérifier si c'est la 5ème offre, si oui ajouter le produit dans la table remporte
 				if (nb.getInt(1)>=5) {
 					System.out.println("Bravo vous avez remporté le produit "+ res.getInt("ID_prod"));
 					PreparedStatement ajout = connection.prepareStatement("INSERT INTO REMPORTE VALUES(? , ((SELECT date_heure FROM OFFRE WHERE ID_prod = ?)\n"
@@ -247,7 +252,7 @@ public class ManagerDatabase {
 		while (true) {
 			System.out.println("------------------------------------------------");
 			System.out.println("Session de " + mail + ", que souhaitez-vous faire ?");
-			System.out.println("1 - Faire une enchère sur un produit");
+			System.out.println("1 - Proposer une enchère sur un produit");
 			System.out.println("2 - Afficher les catégories & sous-catégories");
 			System.out.println("3 - Afficher les catégories & sous-catégories recommandés");
 			System.out.println("4 - Afficher les produits d'une catégorie");
@@ -277,7 +282,7 @@ public class ManagerDatabase {
 					break;
 				case 3:
 					afficheRecommandationsPerso(mail);
-          recommandationsGenerales(mail);
+					recommandationsGenerales(mail);
 					break;
 				case 4:
 					System.out.println("Saisir la catégorie recherchée :");
@@ -324,19 +329,12 @@ public class ManagerDatabase {
 			}
 			scan.close();
 		}
-
-
 	}
 
 	public void afficheProduitCategorie() {
 		try {
 			Statement statmt = connection.createStatement();
 			ResultSet res = statmt.executeQuery("SELECT * FROM CATEGORIE WHERE nom_cat NOT IN (SELECT nom_cat FROM EST_LA_SOUS_CATEGORIE_DE)");
-			/*
-			Resultats1 = Requete(Entree0) puis for Entree1 in Resultats1
-			{ Resultats2 += Requete(Entree1) } etc... (plein de JOIN)
-			SELECT nom_cat FROM EST_LA_SOUS_CATEGORIE_DE WHERE nom_pere = '?';
-			*/
 			while (res.next()) {
 				System.out.println(
 						" -> " + res.getString("nom_cat")
