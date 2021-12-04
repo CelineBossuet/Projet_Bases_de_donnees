@@ -1,4 +1,5 @@
 import java.sql.*;
+import java.util.*;
 
 public class ManagerDatabase {
 
@@ -37,48 +38,7 @@ public class ManagerDatabase {
 		}
 	}
 
-	public void requete() {
-		try {
-			Statement statmt = connection.createStatement();
-			ResultSet res = statmt.executeQuery("SELECT * FROM emp");
-			while (res.next()) {
-				System.out.println(
-						"Employe " + res.getString("ename")
-						+ " -> salaire : " + res.getInt("sal")
-						);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void requeteParam() {
-		try {
-			PreparedStatement statmt = connection.prepareStatement(
-					"SELECT * FROM emp WHERE ename LIKE ?"
-					);
-
-			System.out.println("Nom de l'employe : ");
-			Scanner scan = new Scanner(System.in);
-			String empName = scan.next();
-			scan.nextLine();
-
-			statmt.setString(1, empName);
-			ResultSet res = statmt.executeQuery();
-
-			// Metadonnées associées, existe aussi pour toute la base de données
-			// ResultSetMetaData rmd = res.getMetaData();
-
-			while (res.next()) {
-				System.out.println(
-						"Employe " + res.getString("ename")
-						+ " -> salaire : " + res.getInt("sal")
-						);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
+	
 
 	public void supprimer(String mailUser) {
 		try {
@@ -202,6 +162,10 @@ public class ManagerDatabase {
 			stat.setInt(1, Id_prod);
 			ResultSet res = stat.executeQuery();
 
+			PreparedStatement caract = connection.prepareStatement("SELECT * FROM CARACTERISTIQUE WHERE ID_prod=?");
+			caract.setInt(1, Id_prod);
+			ResultSet cara=stat.executeQuery();
+
 			if (res.next()) {
 				System.out.println("Voici la fiche complète du produit numéro "+ Id_prod);
 				System.out.println("intitulé : " + res.getString("intitule"));
@@ -209,6 +173,11 @@ public class ManagerDatabase {
 				System.out.println("description du produit : \n" + res.getString("texte"));
 				System.out.println("URL : " + res.getString("URL"));
 				System.out.println("présent dans la catégorie : "+res.getString("nom_cat"));
+
+				while (cara.next()){
+					System.out.println("Caractéristique " + cara.getString("nom_cara") + " : " + cara.getString("valeur"));
+				}
+				
 			}else {
 				System.out.println("Le produit n'existe pas");
 			}
@@ -293,6 +262,7 @@ public class ManagerDatabase {
 			switch (Integer.valueOf(optionUser)) {
 				case 0:
 					System.out.println("Déconnexion validée");
+					scan.close();
 					return;
 				case 1:
 					System.out.println("Saisir le numéro du produit :");
@@ -352,6 +322,7 @@ public class ManagerDatabase {
 					// Ne rien faire
 					break;
 			}
+			scan.close();
 		}
 
 

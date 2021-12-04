@@ -60,6 +60,7 @@ public class InterfaceUtilisateur {
 					break;
 			}
 		}
+		scanner.close();
 	}
 
 }
