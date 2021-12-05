@@ -376,12 +376,12 @@ public class ManagerDatabase {
 		try
 		{
 			PreparedStatement statmt = connection.prepareStatement(
-											"SELECT nom_cat, COUNT(*) AS nb_offres FROM (SELECT * FROM OFFRE "
+											"SELECT nom_cat, COUNT(*) AS nb_offres FROM OFFRE "
 											+ "JOIN PRODUIT ON PRODUIT.ID_prod = OFFRE.ID_prod "
 											+ "JOIN UTILISATEUR ON UTILISATEUR.ID_uti = OFFRE.ID_uti "
 											+ "WHERE UTILISATEUR.mail = ? AND NOT EXISTS (SELECT * FROM REMPORTE JOIN OFFRE OFR "
 											+ "ON REMPORTE.ID_prod = OFR.ID_prod AND REMPORTE.date_heure = OFR.date_heure "
-											+ "WHERE OFR.ID_uti = OFFRE.ID_uti AND OFFRE.ID_prod = REMPORTE.ID_prod)) "
+											+ "WHERE OFR.ID_uti = OFFRE.ID_uti AND OFFRE.ID_prod = REMPORTE.ID_prod) "
 											+ "GROUP BY nom_cat ORDER BY nb_offres DESC, nom_cat");
 			statmt.setString(1, mail);
 			ResultSet res = statmt.executeQuery();
