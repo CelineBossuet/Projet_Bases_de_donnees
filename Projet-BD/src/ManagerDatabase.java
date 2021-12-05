@@ -17,8 +17,8 @@ public class ManagerDatabase {
 		try {
 			System.out.println("Connexion ici");
 			String url = "jdbc:oracle:thin:@oracle1.ensimag.fr:1521:oracle1";
-			String user = "chahbana";
-			String password = "chahbana";
+			String user = "ganderf";
+			String password = "ganderf";
 
 			connection = DriverManager.getConnection(url, user, password);
 			connection.setAutoCommit(false);
@@ -150,7 +150,7 @@ public class ManagerDatabase {
 				espaceUser(mail);
 			}
 			else {
-				System.out.println("Mauvaise mot de passe/mail");
+				System.out.println("Mauvais mot de passe/mail");
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -166,7 +166,7 @@ public class ManagerDatabase {
 			
 			PreparedStatement caract = connection.prepareStatement("SELECT * FROM CARACTERISTIQUE WHERE ID_prod=?");
 			caract.setInt(1, Id_prod);
-			ResultSet cara = stat.executeQuery();
+			ResultSet cara = caract.executeQuery();
 
 
 			if (res.next()) {
@@ -267,7 +267,6 @@ public class ManagerDatabase {
 			switch (Integer.valueOf(optionUser)) {
 				case 0:
 					System.out.println("Déconnexion validée");
-					scan.close();
 					return;
 				case 1:
 					System.out.println("Saisir le numéro du produit :");
@@ -327,7 +326,6 @@ public class ManagerDatabase {
 					// Ne rien faire
 					break;
 			}
-			scan.close();
 		}
 	}
 
