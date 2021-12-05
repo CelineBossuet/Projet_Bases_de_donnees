@@ -190,7 +190,7 @@ public class ManagerDatabase {
 		}
 	}
 
-	public void enchere(int ID_prod, int prix_proposé, String mail) {
+	public void enchere(int ID_prod, int prix_propose, String mail) {
 		try {
 			// Récupérer l'ID de l'utilisateur correspondant
 			PreparedStatement sta = connection.prepareStatement("SELECT ID_uti FROM UTILISATEUR WHERE mail=?");
@@ -201,20 +201,20 @@ public class ManagerDatabase {
 			// Récupérer l'ID du produit correspondant et vérifier qu'il ne soit ni déjà acheté, ni trop cher par rapport au prix proposé
 			PreparedStatement statmt = connection.prepareStatement("SELECT ID_prod FROM PRODUIT WHERE ID_prod=? AND prix_produit < ? AND ID_prod NOT IN (SELECT ID_prod FROM REMPORTE)");
 			statmt.setInt(1, ID_prod);
-			statmt.setInt(2, prix_proposé);
+			statmt.setInt(2, prix_propose);
 			ResultSet res = statmt.executeQuery();
 			
 			if(res.next() ) {
 				// Ajouter l'offre dans la base de donnée
 				PreparedStatement statm = connection.prepareStatement("INSERT INTO OFFRE VALUES(?, (SELECT LOCALTIMESTAMP FROM dual), ?, ?)");
 				statm.setInt(1, res.getInt("ID_prod"));
-				statm.setInt(2,  prix_proposé);
+				statm.setInt(2,  prix_propose);
 				statm.setInt(3,  r.getInt("ID_uti"));
 				statm.executeUpdate();
 
 				// Mettre à jour le prix du produit
 				PreparedStatement prd= connection.prepareStatement("UPDATE PRODUIT SET prix_produit=? WHERE ID_prod=?");
-				prd.setInt(1, prix_proposé);
+				prd.setInt(1, prix_propose);
 				prd.setInt(2,ID_prod);
 				prd.executeUpdate();
 
