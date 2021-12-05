@@ -17,20 +17,20 @@
     SELECT id_uti FROM UTILISATEUR WHERE mail LIKE ?;
 
     --si il n'y a aucun résultat:
-    Rollback to save1;
+        Rollback to save1;
 
     --sinon:
-    --on regarde les offres à modifier
-    --remplacer ? par le mail de l'utilisateur qui va être supprimé
-    SELECT ID_prod, date_heure, ID_uti FROM OFFRE WHERE ID_uti = ?;
-    Commit;
+        --on regarde les offres à modifier
+        --remplacer ? par le mail de l'utilisateur qui va être supprimé
+        SELECT ID_prod, date_heure, ID_uti FROM OFFRE WHERE ID_uti = ?;
+        Commit;
 
-    --avec chaque ligne de résultats on modifie:
-    --remplacer le 1er ? par le nouvel ID
-    --remplacer le 2ème ? par l'id de l'utilisateur qui va être supprimé
-    --remplacer le 3ème ? par date_heure de la ligne actuelle du résultat 
-    --remplacer le 4ème ? par ID_prod de la ligne actuelle du résultat 
-    UPDATE OFFRE SET id_uti = ? WHERE id_uti = ? AND date_heure = ? AND ID_prod = ?;
+        --avec chaque ligne de résultats on modifie:
+            --remplacer le 1er ? par le nouvel ID
+            --remplacer le 2ème ? par l'id de l'utilisateur qui va être supprimé
+            --remplacer le 3ème ? par date_heure de la ligne actuelle du résultat 
+            --remplacer le 4ème ? par ID_prod de la ligne actuelle du résultat 
+            UPDATE OFFRE SET id_uti = ? WHERE id_uti = ? AND date_heure = ? AND ID_prod = ?;
 
     --on supprime l'utilisateur
     --remplacer ? par le mail de l'utilisateur qui va être supprimé
@@ -60,6 +60,7 @@
         --Remplacer le 2ème ? par le prix proposé
         --Remplacer le 3ème ? par l'id de lutilisateur
         INSERT INTO OFFRE VALUES(?, (SELECT LOCALTIMESTAMP FROM dual), ?, ?);
+
         --on met à jour le prix du produit dans le table PRODUIT
         --Remplacer le 1er ? par le nouveau prix
         --Remplacer le 2ème ? par l'id du produit
@@ -98,29 +99,29 @@
     JOIN UTILISATEUR
     ON UTILISATEUR.ID_uti = OFFRE.ID_uti
     WHERE UTILISATEUR.mail = ? AND NOT EXISTS (SELECT * FROM REMPORTE JOIN OFFRE OFR 
-                                ON REMPORTE.ID_uti = OFFRE.ID_uti AND REMPORTE.date_heure = OFR.date_heure
-                                WHERE OFR.ID_uti = OFFRE.ID_uti
-                                AND OFFRE.ID_prod = REMPORTE.ID_prod)
+                                                ON REMPORTE.ID_uti = OFFRE.ID_uti AND REMPORTE.date_heure = OFR.date_heure
+                                                WHERE OFR.ID_uti = OFFRE.ID_uti
+                                                AND OFFRE.ID_prod = REMPORTE.ID_prod)
     GROUP BY nom_cat
     ORDER BY nb_offres DESC, nom_cat;
 
 --Recommendations Générales
     --On récupère le nombre moyen d'offres par catégorie pour lesquellesutilisateur n'a pas fait d'offres sans remporter
     --Remplacer ? par le mail de l'utilisateur
-    SELECT nom_cat, AVG(nb_offres) AS moyenne_offre FROM (SELECT prod.ID_prod, prod.nom_cat, COUNT(*) AS nb_offres FROM PRODUIT
-        JOIN OFFRE
-        ON OFFRE.ID_prod = prod.ID_prod
-        GROUP BY prod.ID_prod, pord.nom_cat
-        UNION
-        SELECT prod1.ID_prod, pord1.nom_cat,0 as nb_offres from PRODUIT prod1
-        WHERE prod1.ID_prod NOT IN (SELECT OFFRE.ID_prod from OFFRE)
-        GROUP BY prod1.ID_prod, prod1.nom_cat)
+    SELECT nom_cat, AVG(nb_offres) AS moyenne_offre FROM (SELECT prod.ID_prod, prod.nom_cat, COUNT(*) AS nb_offres FROM PRODUIT prod
+                                                            JOIN OFFRE
+                                                            ON OFFRE.ID_prod = prod.ID_prod
+                                                            GROUP BY prod.ID_prod, prod.nom_cat
+                                                            UNION
+                                                            SELECT prod1.ID_prod, prod1.nom_cat,0 as nb_offres from PRODUIT prod1
+                                                            WHERE prod1.ID_prod NOT IN (SELECT OFFRE.ID_prod from OFFRE)
+                                                            GROUP BY prod1.ID_prod, prod1.nom_cat)
     WHERE nom_cat not in (SELECT DISTINCT PRODUIT.nom_cat FROM OFFRE
-        JOIN PRODUIT ON PRODUIT.ID_prod = OFFRE.ID_prod
-        JOIN UTILISATEUR ON UTILISATEUR.ID_uti = OFFRE.ID_uti
-        WHERE UTILISATEUR.mail = ? AND NOT EXISTS (SELECT * FROM REMPORTE JOIN OFFRE OFR
-            ON REMPORTE.ID_prod = OFR.ID_prod AND REMPORTE.date_heure = OFR.date_heure
-            WHERE OFR.ID_uti = OFFRE.ID_uti AND OFFRE.ID_prod = REMPORTE.ID_prod))
+                            JOIN PRODUIT ON PRODUIT.ID_prod = OFFRE.ID_prod
+                            JOIN UTILISATEUR ON UTILISATEUR.ID_uti = OFFRE.ID_uti
+                            WHERE UTILISATEUR.mail = ? AND NOT EXISTS (SELECT * FROM REMPORTE JOIN OFFRE OFR
+                            ON REMPORTE.ID_prod = OFR.ID_prod AND REMPORTE.date_heure = OFR.date_heure
+                            WHERE OFR.ID_uti = OFFRE.ID_uti AND OFFRE.ID_prod = REMPORTE.ID_prod))
     GROUP BY nom_cat
     ORDER BY moyenne_offre DESC, nom_cat;
 
@@ -131,19 +132,14 @@
     JOIN PRODUIT ON PRODUIT.ID_prod = OFFRE.ID_prod
     WHERE PRODUIT.nom_cat LIKE ?
     AND NOT EXISTS (SELECT * FROM REMPORTE
-        JOIN OFFRE OFR
-        ON REMPORTE.ID_prod = OFR.ID_prod AND REMPORTE.date_heure = OFR.date_heure
-        WHERE OFFRE.ID_prod = REMPORTE.ID_prod)
+                    JOIN OFFRE OFR
+                    ON REMPORTE.ID_prod = OFR.ID_prod AND REMPORTE.date_heure = OFR.date_heure
+                    WHERE OFFRE.ID_prod = REMPORTE.ID_prod)
     GROUP BY OFFRE.ID_prod, PRODUIT.intitule
     ORDER BY nb_offres DESC, PRODUIT.intitule;
     --Pour chaque ligne du résultat:
         --On récupère les informations sur les produits
         SELECT * FROM PRODUIT WHERE ID_prod=?;
-        SELECT * FROM PRODUIT
-        WHERE nom_cat LIKE ?
-        AND NOT EXISTS (SELECT ID_prod FROM OFFRE 
-            WHERE PRODUIT.ID_prod = OFFRE.ID_prod)
-        ORDER BY PRODUIT.intitule;
     --On récupère les produits n'ayant pas d'offres
     --Remplacer ? par le nom de la catégorie entrée
     SELECT * FROM PRODUIT
