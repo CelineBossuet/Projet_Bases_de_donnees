@@ -129,6 +129,18 @@ INSERT INTO OFFRE VALUES (20, (SELECT LOCALTIMESTAMP FROM dual), 19, 3);
 INSERT INTO OFFRE VALUES (20, (SELECT LOCALTIMESTAMP FROM dual), 25, 2);
 INSERT INTO OFFRE VALUES (20, (SELECT LOCALTIMESTAMP FROM dual), 30, 1);
 
+-- Met à jour les prix des produits pour les offres proposées
+UPDATE PRODUIT SET prix_produit = 22 WHERE id_prod = 11;
+UPDATE PRODUIT SET prix_produit = 25 WHERE id_prod = 12;
+UPDATE PRODUIT SET prix_produit = 50 WHERE id_prod = 13;
+UPDATE PRODUIT SET prix_produit = 30 WHERE id_prod = 14;
+UPDATE PRODUIT SET prix_produit = 32 WHERE id_prod = 15;
+UPDATE PRODUIT SET prix_produit = 70 WHERE id_prod = 16;
+UPDATE PRODUIT SET prix_produit = 90 WHERE id_prod = 17;
+UPDATE PRODUIT SET prix_produit = 125 WHERE id_prod = 18;
+UPDATE PRODUIT SET prix_produit = 20 WHERE id_prod = 19;
+UPDATE PRODUIT SET prix_produit = 30 WHERE id_prod = 20;
+
 --On ajoute dans les remportés
 --13
 INSERT INTO REMPORTE VALUES(13 , ((SELECT date_heure FROM OFFRE WHERE ID_prod = 13)
